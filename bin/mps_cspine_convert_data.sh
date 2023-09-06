@@ -1,0 +1,51 @@
+#/bin/bash
+
+DATAFOLDER=$1
+
+SUBLIST="20190308-ST001-C202-1  20190617-ST001-C208-1  20191021-ST001-C204-1  20191207-ST001-C210-1  20191214-ST001-C217-1 20190311-ST001-C201-1  20190618-ST001-C207-1  20191029-ST001-C211-1  20191207-ST001-C215-1 20190327-ST001-C203-1  20190723-ST001-C206-1  20191121-ST001-C212-1  20191214-ST001-C216-1 20191214-ST001-C217-1 20210914-ST001-C219-1 20211119-ST001-C220-1 20211124-ST001-C221-1 20221004-ST001-C222-1 20230510-ST001-C223-1 20230610-ST001-C224-1"
+
+data_convert()
+{
+	DATAFOLDER=$1
+	SESS=$2
+	NAME=$3
+	STRING=$4
+
+
+	DICOMFOLDER=$DATAFOLDER/dicom
+	NIIFOLDER=$DATAFOLDER/nii
+
+
+	
+	if [ ! -d $NIIFOLDER/$SESS ];then
+		mkdir $NIIFOLDER/$SESS
+		chmod 770 $NIIFOLDER/$SESS
+	fi
+	if [ ! -f $NIIFOLDER/$SESS/$NAME.nii.gz ]; then
+		echo "$SESS: $NAME export from DICOM to NIFTI"
+		mkdir $NIIFOLDER/$SESS/temp
+		dcm2niix -z y -b y -ba y -o $NIIFOLDER/$SESS/temp $DICOMFOLDER/$SESS/$STRING/* > /dev/null
+		#fslmerge -t $NIIFOLDER/$SESS/temp/$NAME.nii.gz $NIIFOLDER/$SESS/temp/*$STRING*.nii.gz
+		cp $NIIFOLDER/$SESS/temp/*$STRING*.nii.gz $NIIFOLDER/$SESS/$NAME.nii.gz
+		if [ $NAME == 'magnitude' ];then
+		    cp $NIIFOLDER/$SESS/temp/*$STRING*1.json $NIIFOLDER/$SESS/$NAME.json
+		else
+		    cp $NIIFOLDER/$SESS/temp/*$STRING*.json $NIIFOLDER/$SESS/$NAME.json
+		fi
+		if [ -f $NIIFOLDER/$SESS/temp/*$STRING*.bval ]; then
+		    cp $NIIFOLDER/$SESS/temp/*$STRING*.bval $NIIFOLDER/$SESS/$NAME.bval
+		    cp $NIIFOLDER/$SESS/temp/*$STRING*.bvec $NIIFOLDER/$SESS/$NAME.bvec
+		fi
+		rm -r $NIIFOLDER/$SESS/temp
+		chmod 660 $NIIFOLDER/$SESS/$NAME.*
+	fi
+}
+
+cd $DICOMFOLDER
+for SUB in $SUBLIST; do
+	data_convert $DATAFOLDER $SUB t2sag MR-SE0*-t2_tse_sag_384
+	data_convert $DATAFOLDER $SUB t1sag MR-SE0*-t1_tse_sag_384
+	data_convert $DATAFOLDER $SUB t2tra MR-SE0*-t2_tse_tra_p2
+	data_convert $DATAFOLDER $SUB dmri_ap MR-SE0*-resolve_AX_AP_p2
+	data_convert $DATAFOLDER $SUB dmri_pa MR-SE0*-resolve_AX_PA_p2
+done
