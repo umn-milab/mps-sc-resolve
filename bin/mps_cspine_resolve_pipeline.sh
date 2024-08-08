@@ -1,10 +1,10 @@
 #!/bin/bash -l
 
-#DATAFOLDER=/home/porto-raid2/nestrasil-data/MPS/cspine_resolve
-#APEND="_CSP"
+DATAFOLDER=/home/porto-raid2/nestrasil-data/MPS/cspine_resolve
+APEND="_CSP"
 
-DATAFOLDER=/home/range1-raid1/labounek/data-on-porto/controls/cspine_resolve
-APEND=""
+#DATAFOLDER=/home/range1-raid1/labounek/data-on-porto/controls/cspine_resolve
+#APEND=""
 
 NIIFOLDER=$DATAFOLDER/nii
 RESULTFOLDER=$DATAFOLDER/results
