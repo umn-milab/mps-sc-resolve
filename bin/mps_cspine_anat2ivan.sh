@@ -1,12 +1,12 @@
 #!/bin/bash -l
 
-#DATAFOLDER=/home/porto-raid2/nestrasil-data/MPS/cspine_resolve
-#APEND="_CSP"
+DATAFOLDER=/home/porto-raid2/nestrasil-data/MPS/cspine_resolve
+APEND="_CSP"
 
-DATAFOLDER=/home/range1-raid1/labounek/data-on-porto/controls/cspine_resolve
+#DATAFOLDER=/home/range1-raid1/labounek/data-on-porto/controls/cspine_resolve
 #APEND=""
 
-IVANFOLDER=/home/range1-raid1/labounek/data-on-porto/shared/MPS-cspine-krasovecivan-20210719
+IVANFOLDER=/home/range1-raid1/labounek/data-on-porto/shared/MPS-cspine-krasovecivan-20240925
 
 NIIFOLDER=$DATAFOLDER/nii
 RESULTFOLDER=$DATAFOLDER/results
@@ -16,7 +16,7 @@ SAVEFOLDER=$RESULTFOLDER/tables
 
 cd $NIIFOLDER
 
-for SUB in `ls -d 20*`;do
+for SUB in `ls -d 20170127-ST001-2MPS1041-2* 20170801-ST001-2MPS1048-1* 2019*`;do
 	if [ ! -d $IVANFOLDER/$SUB ]; then
 		mkdir $IVANFOLDER/$SUB
 		chmod 770 $IVANFOLDER/$SUB

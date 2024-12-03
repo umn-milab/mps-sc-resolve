@@ -343,6 +343,9 @@ t2tra_to_diff_function()
 		mv eddy_b0.nii.gz b0.nii.gz
 	fi
 
+	#sct_register_multimodal -i $ANATFOLDER/T2SAG_resample_seg.nii.gz -d dwi_mean.nii.gz -identity 1 -x nn -o T2TRA_seg_in_DIFF.nii.gz	# used as init centerline for propseg in next step
+	#mv warp_dwi_mean2T2SAG_resample_seg.nii.gz warp_DIFFtoT2TRA.nii.gz
+	#mv warp_T2SAG_resample_seg2dwi_mean.nii.gz warp_T2TRAtoDIFF.nii.gz
 	sct_register_multimodal -i $ANATFOLDER/T2TRA_thr_bias_corr_seg.nii.gz -d dwi_mean.nii.gz -identity 1 -x nn -o T2TRA_seg_in_DIFF.nii.gz	# used as init centerline for propseg in next step
 	mv warp_dwi_mean2T2TRA_thr_bias_corr_seg.nii.gz warp_DIFFtoT2TRA.nii.gz
 	mv warp_T2TRA_thr_bias_corr_seg2dwi_mean.nii.gz warp_T2TRAtoDIFF.nii.gz
@@ -355,6 +358,11 @@ t2tra_to_diff_function()
 		echo "${yellow}$(date +%x_%T): SC segmentation in $DATA/$FOLDER folder using sct_deepseg is done.${normal}"
 	fi
 
+	#sct_register_multimodal -i b0_mean.nii.gz -d $ANATFOLDER/T2SAG_resample.nii.gz -iseg dwi_mean_seg.nii.gz -dseg $ANATFOLDER/T2SAG_resample_seg.nii.gz -param step=1,type=seg,algo=slicereg,metric=CC,smooth=5:step=2,type=seg,algo=bsplinesyn,metric=CC,smooth=1,iter=3 -initwarp warp_DIFFtoT2TRA.nii.gz -initwarpinv warp_T2TRAtoDIFF.nii.gz
+	#mv T2SAG_resample_reg.nii.gz T2TRA_in_DIFF.nii.gz
+	#mv b0_mean_reg.nii.gz b0_mean_in_T2TRA.nii.gz
+	#mv warp_T2SAG_resample2b0_mean.nii.gz warp_T2TRAtoDIFF.nii.gz
+	#mv warp_b0_mean2T2SAG_resample.nii.gz warp_DIFFtoT2TRA.nii.gz
 	sct_register_multimodal -i b0_mean.nii.gz -d $ANATFOLDER/T2TRA_thr_bias_corr.nii.gz -iseg dwi_mean_seg.nii.gz -dseg $ANATFOLDER/T2TRA_thr_bias_corr_seg.nii.gz -param step=1,type=seg,algo=slicereg,metric=CC,smooth=5:step=2,type=seg,algo=bsplinesyn,metric=CC,smooth=1,iter=3 -initwarp warp_DIFFtoT2TRA.nii.gz -initwarpinv warp_T2TRAtoDIFF.nii.gz
 	mv T2TRA_thr_bias_corr_reg.nii.gz T2TRA_in_DIFF.nii.gz
 	mv b0_mean_reg.nii.gz b0_mean_in_T2TRA.nii.gz
@@ -376,7 +384,8 @@ difflabel_function()
 
 	cd $DATA/$FOLDER
 
-	sct_apply_transfo -i $ANATFOLDER/T2TRA_thr_bias_corr_seg_labeled.nii.gz -d b0_mean.nii.gz -w warp_T2TRAtoDIFF.nii.gz -o b0_mean_warped_labels.nii.gz -x nn
+	sct_apply_transfo -i $ANATFOLDER/T2SAG_resample_seg_labeled.nii.gz -d b0_mean.nii.gz -w warp_T2TRAtoDIFF.nii.gz -o b0_mean_warped_labels.nii.gz -x nn
+	#sct_apply_transfo -i $ANATFOLDER/T2TRA_thr_bias_corr_seg_labeled.nii.gz -d b0_mean.nii.gz -w warp_T2TRAtoDIFF.nii.gz -o b0_mean_warped_labels.nii.gz -x nn
 
 	gunzip b0_mean_warped_labels.nii.gz
 	gunzip dwi_mean_seg.nii.gz

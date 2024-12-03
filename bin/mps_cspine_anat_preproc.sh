@@ -14,8 +14,8 @@ if [ $APD == "_CSP" ];then
 fi
 
 NIFTI=/home/range1-raid1/labounek/toolbox/matlab/NIfTI_tools
-BINDIR=/home/range1-raid1/labounek/git/mps-sc-resolve/bin
-MATLABSCRIPTDIR=/home/range1-raid1/labounek/git/mps-sc-resolve/matlab
+BINDIR=~/git/mps-sc-resolve/bin
+MATLABSCRIPTDIR=~/git/mps-sc-resolve/matlab
 MATLABDIR=/opt/local/matlab2017b
 
 red=`tput setaf 1`
