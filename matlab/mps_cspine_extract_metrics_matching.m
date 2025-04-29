@@ -5,7 +5,7 @@ project_folder=fullfile(data_folder,'MPS','cspine_resolve');
 
 
 xls_file = fullfile(project_folder,'results','cspine_resolve.xlsx');
-save_path = fullfile(project_folder,'pictures','graphs-20241113');
+save_path = fullfile(project_folder,'pictures','graphs-20241113-mps1041');
 pvaladjust_file = fullfile(project_folder,'results','pvaladjust-20241113.mat');
 
 % xls_file = fullfile(project_folder,'results','cspine_resolve_all_matched.xlsx');
@@ -16,6 +16,9 @@ dmripreproc='topup-eddy';
 roidefinition='level-specific';
 
 % addpath('/home/range1-raid1/labounek/toolbox/matlab/spm12');
+
+graph_specific_sub = 1;
+show_sub = '2MPS1041';
 
 clr_hc = [0 0.749 1];
 clr_mpsi = [1 1 1]*0.4;
@@ -52,14 +55,25 @@ axismat = [xmin xmax 20 100
     xmin xmax 0.8 1.5
     ];
 
-axismat_err = [xmin xmax 40 100
-    xmin xmax 5 10
-    xmin xmax 8 16
-    xmin xmax 0.35 0.75
-    xmin xmax 1.4 2.1
-    xmin xmax 0.5 1.0
-    xmin xmax 0.9 1.3
-    ];
+if graph_specific_sub ~= 1
+    axismat_err = [xmin xmax 40 100
+        xmin xmax 5 10
+        xmin xmax 8 16
+        xmin xmax 0.35 0.75
+        xmin xmax 1.4 2.1
+        xmin xmax 0.5 1.0
+        xmin xmax 0.9 1.3
+        ];
+else
+    axismat_err = [xmin xmax 40 100
+        xmin xmax 5 10
+        xmin xmax 8 16
+        xmin xmax 0.35 0.75
+        xmin xmax 1.4 2.1
+        xmin xmax 0.45 1.0
+        xmin xmax 0.85 1.3
+        ];
+end
 
 g_ylbl = {
     'CSA [mm^2]'
@@ -694,6 +708,10 @@ for vr = 1:size(pT,2)
     g_mps_std = std(g_mps,0,'omitnan');
     g_hc_mean = mean(g_hc,'omitnan');
     g_hc_std = std(g_hc,0,'omitnan');
+    
+    if graph_specific_sub == 1
+        g_showsub = g_mps(strcmp(subid_mps,show_sub),:);
+    end
 
     subplot(4,2,vr)
     errorbar(x,g_hc_mean,g_hc_std,'b','LineWidth',4)
@@ -710,6 +728,10 @@ for vr = 1:size(pT,2)
                 plot(x(level)+0.25,axismat_err(vr,4)-0.11*(axismat_err(vr,4)-axismat_err(vr,3)),'ks','MarkerSize',11,'LineWidth',2,'MarkerFaceColor','k')
             end
         end
+    end
+    
+    if graph_specific_sub == 1
+        plot(x,g_showsub,'--d','Color',clr_mpsi,'Linewidth',3,'MarkerSize',11)
     end
     
     hold off
@@ -731,10 +753,20 @@ plot([-0.4 0.4],[yhc_std yhc_std],'r','LineWidth',3)
 plot(1,1,'+','Color','k','LineWidth',3,'MarkerSize',11)
 plot(1,1,'>','Color','k','LineWidth',2,'MarkerSize',11,'MarkerFaceColor','k')
 plot(1,1,'s','Color','k','LineWidth',2,'MarkerSize',11,'MarkerFaceColor','k')
+if graph_specific_sub == 1
+    plot(1,1,'--d','Color',clr_mpsi,'LineWidth',3,'MarkerSize',11)
+end
 hold off
-legend('Healthy controls','MPS I and VI patients','Two-sample t-test (p_{BH}<0.05)',...
-    'ANCOVA (Conf: Weight; p<0.05)','ANCOVA (Conf: Height; p<0.05)',...
-    'Location','northwest')
+if graph_specific_sub ~= 1
+    legend('Healthy controls','MPS I and VI patients','Two-sample t-test (p_{BH}<0.05)',...
+        'ANCOVA (Conf: Weight; p<0.05)','ANCOVA (Conf: Height; p<0.05)',...
+        'Location','northwest')
+else
+    legend('Healthy controls','MPS I and VI patients','Two-sample t-test (p_{BH}<0.05)',...
+        'ANCOVA (Conf: Weight; p<0.05)','ANCOVA (Conf: Height; p<0.05)',...
+        show_sub(2:end),...
+        'Location','northwest')
+end
 set(gca,'FontSize',14,'LineWidth',2)
 axis([-101 -100 -101 -100]);
 axis off
@@ -966,6 +998,10 @@ for varind = 1:size(measurement,2)
     yhc = measurement_hc(:,2,varind);   
     y = measurement_mps(:,2,varind);
     
+    if graph_specific_sub == 1
+        y_showsub = y(strcmp(subid_mps,show_sub));
+    end
+    
     if size(yhc,1) == size(y,1)
         bh = boxplot([yhc y], 1:2,'BoxStyle','outline','Colors',colors_box);
     elseif size(yhc,1) + 1 == size(y,1)
@@ -1005,6 +1041,9 @@ for varind = 1:size(measurement,2)
         if pANCOVA_height_measurement(1,varind) < 0.05
             plot(1.7,cf*max([y; yhc]),'ks','MarkerSize',11,'LineWidth',2,'MarkerFaceColor','k')
         end
+    end
+    if graph_specific_sub == 1
+        plot(2,y_showsub,'d','Color',clr_mpsi,'Linewidth',3,'MarkerSize',11)
     end
     grid on
     hold off
