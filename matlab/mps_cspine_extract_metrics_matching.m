@@ -1,23 +1,31 @@
 clear all; clc; close all;
+
+% Useful commands
+% subid_mps(strcmp(table2cell(clintbl(:,'Compression')),'no') & strcmp(mpsitype_mps,'HS'))
+
 % save('data_mps_for_thierry.mat','data_mps','data_hc','data_names','pss_mps','grp_mps','age_hc','age_mps','height_hc','height_mps','weight_hc','weight_mps','sex_hc','sex_mps','mri_corr','mri_corr_names')
 data_folder='/home/range1-raid1/labounek/data-on-porto';
 project_folder=fullfile(data_folder,'MPS','cspine_resolve');
 
 
 xls_file = fullfile(project_folder,'results','cspine_resolve.xlsx');
-save_path = fullfile(project_folder,'pictures','graphs-20241113-mps1041');
+save_path = fullfile(project_folder,'pictures','graphs-20241113');
 pvaladjust_file = fullfile(project_folder,'results','pvaladjust-20241113.mat');
+clintable_file = fullfile(project_folder,'results','MPS-C-spine-Rene-table2.csv');
 
 % xls_file = fullfile(project_folder,'results','cspine_resolve_all_matched.xlsx');
 % save_path = fullfile(project_folder,'pictures','graphs-20241001_all_matched');
 % pvaladjust_file = fullfile(project_folder,'results','pvaladjust-20241001_all_matched.mat');
+
+aim2_hc_result_file = ('/home/range1-raid1/labounek/data-on-porto/MPS/cspine_brain/tables/aim2_csa-SC_T2w.mat');
+
 
 dmripreproc='topup-eddy';
 roidefinition='level-specific';
 
 % addpath('/home/range1-raid1/labounek/toolbox/matlab/spm12');
 
-graph_specific_sub = 1;
+graph_specific_sub = 0;
 show_sub = '2MPS1041';
 
 clr_hc = [0 0.749 1];
@@ -87,6 +95,8 @@ g_ylbl = {
 
 load(pvaladjust_file)
 [num, txt, raw] = xlsread(xls_file);
+
+clintbl = readtable(clintable_file,'PreserveVariableNames',1);
 
 nsess=size(raw,1)-2;
 nlevels = 7;
@@ -286,6 +296,18 @@ subject = repmat((1:size(data_mps,1))',1,size(data_mps,2));
 [tmp, p_tmp] = corrcoef(ageT_mps,age_mps(:,2),'Rows','Pairwise');
 r_ageXageT_v2 = tmp(1,2);
 p_r_ageXageT_v2 = p_tmp(1,2);
+
+hc.morpho = squeeze(data_hc(:,2,:,1:3));
+hc.morpho_names = morpho_metrics;
+hc.age = age_hc(:,2);
+hc.height = height_hc(:,2);
+hc.weight = weight_hc(:,2);
+hc.bmi = bmi_hc(:,2);
+hc.sex = sex_hc;
+hc.subid = subid_hc;
+hc.sessid = sessid_hc;
+save(aim2_hc_result_file,'hc')
+
 
 for level = 1:size(data_mps,3)
     for vr = 1:size(data_mps,4)
@@ -529,6 +551,8 @@ for varind = 1:size(data_mps,4)
     yy = squeeze(data_mps(:,2,:,varind));
     CC(:,:,varind) = squeeze(data_hc(age_hc(:,2) > agethr_HS,2,:,varind));
     CC_fS(:,:,varind) = squeeze(data_hc(age_hc(:,2) > agethr_S1 & age_hc(:,2) < agethr_S2,2,:,varind));
+    CC_compression(:,:,varind) = squeeze(data_hc(:,2,:,varind));
+    
     
     yy_HS = yy(strcmp(mpsitype_mps,'HS'),:);
     yy_H = yy(strcmp(mpsitype_mps,'H') & age_mps(:,2) > agethr_HS ,:);
@@ -536,11 +560,35 @@ for varind = 1:size(data_mps,4)
     yy_S = yy(strcmp(mpsitype_mps,'S'),:);
     yy_HfS = yy(strcmp(mpsitype_mps,'H') & age_mps(:,2) > agethr_S1 & age_mps(:,2) < agethr_S2,:);
     
+    yy_stenosis = yy(strcmp(table2cell(clintbl(:,'Compression')),'no') & strcmp(table2cell(clintbl(:,'Myelopathy')),'no'),:);
+    yy_compression = yy( ~strcmp(table2cell(clintbl(:,'Compression')),'no') & strcmp(table2cell(clintbl(:,'Myelopathy')),'no') ,:);
+    yy_myelopathy = yy(strcmp(table2cell(clintbl(:,'Myelopathy')),'yes'),:);
+    
+    if varind == 1
+        pos_stenosis_mpsvi = grp_mps(strcmp(table2cell(clintbl(:,'Compression')),'no') & strcmp(table2cell(clintbl(:,'Myelopathy')),'no') ,1)==6;
+        pos_stenosis_H = strcmp(mpsitype_mps(strcmp(table2cell(clintbl(:,'Compression')),'no') & strcmp(table2cell(clintbl(:,'Myelopathy')),'no'),1),'H');
+        pos_stenosis_HS = strcmp(mpsitype_mps(strcmp(table2cell(clintbl(:,'Compression')),'no') & strcmp(table2cell(clintbl(:,'Myelopathy')),'no'),1),'HS');
+        pos_stenosis_S = strcmp(mpsitype_mps(strcmp(table2cell(clintbl(:,'Compression')),'no') & strcmp(table2cell(clintbl(:,'Myelopathy')),'no'),1),'S');
+        
+        pos_compression_mpsvi = grp_mps(~strcmp(table2cell(clintbl(:,'Compression')),'no') & strcmp(table2cell(clintbl(:,'Myelopathy')),'no') ,1)==6;
+        pos_compression_H = strcmp(mpsitype_mps(~strcmp(table2cell(clintbl(:,'Compression')),'no') & strcmp(table2cell(clintbl(:,'Myelopathy')),'no') ,1),'H');
+        pos_compression_HS = strcmp(mpsitype_mps(~strcmp(table2cell(clintbl(:,'Compression')),'no') & strcmp(table2cell(clintbl(:,'Myelopathy')),'no') ,1),'HS');
+        pos_compression_S = strcmp(mpsitype_mps(~strcmp(table2cell(clintbl(:,'Compression')),'no') & strcmp(table2cell(clintbl(:,'Myelopathy')),'no') ,1),'S');
+        
+        pos_myelopathy_mpsvi = grp_mps(strcmp(table2cell(clintbl(:,'Myelopathy')),'yes'),1)==6;
+        pos_myelopathy_H = strcmp(mpsitype_mps(strcmp(table2cell(clintbl(:,'Myelopathy')),'yes'),1),'H');
+        pos_myelopathy_HS = strcmp(mpsitype_mps(strcmp(table2cell(clintbl(:,'Myelopathy')),'yes'),1),'HS');
+        pos_myelopathy_S = strcmp(mpsitype_mps(strcmp(table2cell(clintbl(:,'Myelopathy')),'yes'),1),'S');
+    end
+    
     YY_HS(:,:,varind) = yy_HS;
     YY_H(:,:,varind) = yy_H;
     YY_VI(:,:,varind) = yy_VI;
     YY_S(:,:,varind) = yy_S;
     YY_HfS(:,:,varind) = yy_HfS;
+    YY_stenosis(:,:,varind) = yy_stenosis;
+    YY_compression(:,:,varind) = yy_compression;
+    YY_myelopathy(:,:,varind) = yy_myelopathy;
     
     [~, pT_HS_agr(1,varind)]=ttest2(  yy_HS(:)  , yy_H(:) );
     [~, pT_VI_agr(1,varind)]=ttest2(  yy_VI(:)  , yy_H(:) );
@@ -549,6 +597,15 @@ for varind = 1:size(data_mps,4)
     pW_HS_agr(1,varind)=ranksum(  yy_HS(:)  , yy_H(:) );
     pW_VI_agr(1,varind)=ranksum(  yy_VI(:)  , yy_H(:) );
     pW_S_agr(1,varind)=ranksum(  yy_S(:)  , yy_HfS(:) );
+    
+    CC_tmp = CC_compression(:,:,varind);
+    [~, pT_stenosis_agr(1,varind)]=ttest2(  CC_tmp(:)  , yy_stenosis(:) );
+    [~, pT_compression_agr(1,varind)]=ttest2(  yy_stenosis(:)  , yy_compression(:) );
+    [~, pT_myelopathy_agr(1,varind)]=ttest2(  yy_compression(:)  , yy_myelopathy(:) );
+    
+    pW_stenosis_agr(1,varind)=ranksum(  CC_tmp(:)  , yy_stenosis(:) );
+    pW_compression_agr(1,varind)=ranksum(  yy_stenosis(:)  , yy_compression(:) );
+    pW_myelopathy_agr(1,varind)=ranksum(  yy_compression(:)  , yy_myelopathy(:) );
     
     subplot(4,2,8)
     plot([-0.4 0.4],[yhc_mean yhc_mean],'Color',clr_stats,'LineWidth',5)
@@ -913,6 +970,10 @@ for varind = 1:size(measurement,2)
         plot(tm(~isnan(y_all(ps,:))),y_all(ps,~isnan(y_all(ps,:))),mrk,'Color',clr,'LineWidth',3,'MarkerSize',9)
     end
     
+    YY_measurement_stenosis(:,varind) = y(strcmp(table2cell(clintbl(:,'Compression')),'no') & strcmp(table2cell(clintbl(:,'Myelopathy')),'no'),:);
+    YY_measurement_compression(:,varind) = y( ~strcmp(table2cell(clintbl(:,'Compression')),'no') & strcmp(table2cell(clintbl(:,'Myelopathy')),'no') ,:);
+    YY_measurement_myelopathy(:,varind) = y(strcmp(table2cell(clintbl(:,'Myelopathy')),'yes'),:);
+    
     [~, pT_measurement(1,varind)]=ttest2(yhc,y);
     pW_measurement(1,varind)=ranksum(yhc,y);
     
@@ -923,6 +984,14 @@ for varind = 1:size(measurement,2)
     pW_measurement_HS(1,varind)=ranksum(  y(strcmp(mpsitype_mps,'HS'))  , y(strcmp(mpsitype_mps,'H') & age_mps(:,2) > agethr_HS ) );
     pW_measurement_VI(1,varind)=ranksum(  y(grp_mps==6)  , y(strcmp(mpsitype_mps,'H') & age_mps(:,2) > agethr_HS ) );
     pW_measurement_S(1,varind)=ranksum(  y(strcmp(mpsitype_mps,'S'))  , y(strcmp(mpsitype_mps,'H') & age_mps(:,2) > agethr_S1 & age_mps(:,2) < agethr_S2 ) );
+    
+    [~, pT_measurement_stenosis(1,varind)]=ttest2(  yhc  , YY_measurement_stenosis(:,varind) );
+    [~, pT_measurement_compression(1,varind)]=ttest2(  YY_measurement_stenosis(:,varind)  , YY_measurement_compression(:,varind) );
+    [~, pT_measurement_myelopathy(1,varind)]=ttest2(  YY_measurement_compression(:,varind)  , YY_measurement_myelopathy(:,varind) );
+    
+    pW_measurement_stenosis(1,varind)=ranksum(  yhc  , YY_measurement_stenosis(:,varind) );
+    pW_measurement_compression(1,varind)=ranksum(  YY_measurement_stenosis(:,varind)  , YY_measurement_compression(:,varind) );
+    pW_measurement_myelopathy(1,varind)=ranksum(  YY_measurement_compression(:,varind)  , YY_measurement_myelopathy(:,varind) );
     
     p_tmp = anovan([y; yhc],{grp_ancova,weight_ancova},'Continuous',2,'varnames',{'Group','Weight'},'display','off');
     pANCOVA_weight_measurement(1,varind)= p_tmp(1);
@@ -1898,7 +1967,7 @@ for ind = [4 6 7]
     ylabel(['C4-C7 ' g_ylbl{ind,1}])
     axis([xx min(ydata) max(ydata)])
     grid on
-    if ind < 9
+    if ind < 7
         set(gca,'XTick',0:10:200,'XtickLabel','')
     else
         xlabel(xdata_names)
@@ -1909,7 +1978,7 @@ for ind = [4 6 7]
     sbpl = sbpl + 5;
 end
 
-subplot(3,3,9)
+subplot(3,4,12)
 plot([1.5 2.5],[0 0],'^','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
 hold on
 plot([1.5 2.5],[0 0],'o','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
@@ -1928,3 +1997,207 @@ pause(0.15)
 close(h(fgrs+11).fig)
 pause(0.1)
 disp(num2str(fgrs+11))
+
+
+%% Show stenosis, compression and myelopathy - aggregated qMRI data
+
+vr = find(pT_stenosis_agr < 0.05 | pT_compression_agr < 0.05 | pT_myelopathy_agr < 0.05)';
+mrk_size = 140;
+
+h(fgrs+12).fig = figure(fgrs+12);
+set(h(fgrs+12).fig,'Position',[1000 40 1500 1200])
+
+sbpl = 1;
+for ind = 1:size(vr,1)   
+    Cdata = CC_compression(:,:,vr(ind,1));
+    
+    Hdata_stenosis = YY_stenosis(pos_stenosis_H==1,:,vr(ind,1));
+    HSdata_stenosis = YY_stenosis(pos_stenosis_HS==1,:,vr(ind,1));
+    Sdata_stenosis = YY_stenosis(pos_stenosis_S==1,:,vr(ind,1));
+    VIdata_stenosis = YY_stenosis(pos_stenosis_mpsvi==1,:,vr(ind,1));
+    
+    STENdata = [Hdata_stenosis; HSdata_stenosis; Sdata_stenosis; VIdata_stenosis];
+    
+    Hdata_compression = YY_compression(pos_compression_H==1,:,vr(ind,1));
+    HSdata_compression = YY_compression(pos_compression_HS==1,:,vr(ind,1));
+    Sdata_compression = YY_compression(pos_compression_S==1,:,vr(ind,1));
+    VIdata_compression = YY_compression(pos_compression_mpsvi==1,:,vr(ind,1));
+    
+    COMPdata = [Hdata_compression; HSdata_compression; Sdata_compression; VIdata_compression];
+    
+    Hdata_myelopathy = YY_myelopathy(pos_myelopathy_H==1,:,vr(ind,1));
+    HSdata_myelopathy = YY_myelopathy(pos_myelopathy_HS==1,:,vr(ind,1));
+    Sdata_myelopathy = YY_myelopathy(pos_myelopathy_S==1,:,vr(ind,1));
+    VIdata_myelopathy = YY_myelopathy(pos_myelopathy_mpsvi==1,:,vr(ind,1));
+    
+    MYELdata = [Hdata_myelopathy; HSdata_myelopathy; Sdata_myelopathy; VIdata_myelopathy];
+    
+    ymax = max([Cdata(:); ...
+        Hdata_stenosis(:); HSdata_stenosis(:); Sdata_stenosis(:); VIdata_stenosis(:); ...
+        Hdata_compression(:); HSdata_compression(:); Sdata_compression(:); VIdata_compression(:); ...
+        Hdata_myelopathy(:); HSdata_myelopathy(:); Sdata_myelopathy(:); VIdata_myelopathy(:); ...
+        ]);
+    
+    subplot(2,4,sbpl)
+    plot([0.60 1.40],[mean(Cdata(:),'omitnan') mean(Cdata(:),'omitnan')],'k','LineWidth',5)
+    hold on
+    plot([1.60 2.40],[mean(STENdata(:),'omitnan') mean(STENdata(:),'omitnan')],'k','LineWidth',5)
+    plot([2.60 3.40],[mean(COMPdata(:),'omitnan') mean(COMPdata(:),'omitnan')],'k','LineWidth',5)
+    plot([3.60 4.40],[mean(MYELdata(:),'omitnan') mean(MYELdata(:),'omitnan')],'k','LineWidth',5)
+    scatter(ones(size(Cdata(:))),Cdata(:),mrk_size,'v','MarkerEdgeColor',clr_hc,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(Hdata_stenosis(:))),Hdata_stenosis(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(HSdata_stenosis(:))),HSdata_stenosis(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(Sdata_stenosis(:))),Sdata_stenosis(:),mrk_size,'d','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(VIdata_stenosis(:))),VIdata_stenosis(:),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    
+    scatter(3*ones(size(Hdata_compression(:))),Hdata_compression(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(HSdata_compression(:))),HSdata_compression(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(Sdata_compression(:))),Sdata_compression(:),mrk_size,'d','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(VIdata_compression(:))),VIdata_compression(:),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    
+    scatter(4*ones(size(Hdata_myelopathy(:))),Hdata_myelopathy(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(4*ones(size(HSdata_myelopathy(:))),HSdata_myelopathy(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(4*ones(size(Sdata_myelopathy(:))),Sdata_myelopathy(:),mrk_size,'d','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(4*ones(size(VIdata_myelopathy(:))),VIdata_myelopathy(:),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    
+    if pT_stenosis_agr(1,vr(ind,1)) < 0.05
+        text(2,0.97*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
+    end
+    if pT_compression_agr(1,vr(ind,1)) < 0.05
+        text(3,0.97*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
+    end
+    if pT_myelopathy_agr(1,vr(ind,1)) < 0.05
+        text(4,0.97*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
+    end
+
+    hold off
+    ylabel(['C1-C7 ' g_ylbl{vr(ind,1),1}])
+    xlim([0.5 4.5])
+    grid on
+    if ind < 3
+        set(gca,'XTick',1:4,'XTickLabel','')
+    else
+        set(gca,'XTick',1:4,'XTickLabel',{'Healthy controls','Stenosis','Compression','Myelopathy'})
+        xtickangle(45)
+    end
+    set(gca,'FontSize',16,'LineWidth',2)
+    
+    if sbpl == 3
+        sbpl = sbpl + 2;
+    else
+        sbpl = sbpl + 1;
+    end
+end
+
+subplot(2,4,4)
+plot([1.5 2.5],[0 0],'v','Color',clr_hc,'LineWidth',3,'MarkerSize',13)
+hold on
+plot([1.5 2.5],[0 0],'^','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
+plot([1.5 2.5],[0 0],'o','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
+plot([1.5 2.5],[0 0],'d','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
+plot([1.5 2.5],[0 0],'x','Color','r','LineWidth',3,'MarkerSize',13)
+hold off
+legend('Healthy control','MPS I - Hurler syndrome','MPS I - Hurler-Scheie syndrome','MPS I - Scheie syndrome',...
+    'MPS VI',...
+    'Location','southwest')
+set(gca,'FontSize',14,'LineWidth',2)
+axis([-101 -100 -101 -100]);
+axis off
+
+print(fullfile(save_path,['graph' num2str(fgrs+12) '-compression-aggregated-differences' ]),'-dpng','-r300')
+pause(0.15)
+close(h(fgrs+12).fig)
+pause(0.1)
+disp(num2str(fgrs+12))
+
+
+%% Show stenosis, compression and myelopathy - manual measurement data
+
+vr = find(pT_measurement_stenosis < 0.05 | pT_measurement_compression < 0.05);
+mrk_size = 140;
+
+h(fgrs+13).fig = figure(fgrs+13);
+set(h(fgrs+13).fig,'Position',[1000 40 1500 1200])
+sbpl = 1;
+for ind = 1:size(vr,2)   
+    Cdata = measurement_hc(:,2,vr(1,ind));
+    
+    Hdata_stenosis = YY_measurement_stenosis(pos_stenosis_H,vr(1,ind));
+    HSdata_stenosis = YY_measurement_stenosis(pos_stenosis_HS,vr(1,ind));
+    Sdata_stenosis = YY_measurement_stenosis(pos_stenosis_S,vr(1,ind));
+    VIdata_stenosis = YY_measurement_stenosis(pos_stenosis_mpsvi,vr(1,ind));
+    
+    STENdata = [Hdata_stenosis; HSdata_stenosis; Sdata_stenosis; VIdata_stenosis];
+    
+    Hdata_compression = YY_measurement_compression(pos_compression_H,vr(1,ind));
+    HSdata_compression = YY_measurement_compression(pos_compression_HS,vr(1,ind));
+    Sdata_compression = YY_measurement_compression(pos_compression_S,vr(1,ind));
+    VIdata_compression = YY_measurement_compression(pos_compression_mpsvi,vr(1,ind));
+    
+    COMPdata = [Hdata_compression; HSdata_compression; Sdata_compression; VIdata_compression];
+    
+    Hdata_myelopathy = YY_measurement_myelopathy(pos_myelopathy_H,vr(1,ind));
+    HSdata_myelopathy = YY_measurement_myelopathy(pos_myelopathy_HS,vr(1,ind));
+    Sdata_myelopathy = YY_measurement_myelopathy(pos_myelopathy_S,vr(1,ind));
+    VIdata_myelopathy = YY_measurement_myelopathy(pos_myelopathy_mpsvi,vr(1,ind));
+    
+    MYELdata = [Hdata_myelopathy; HSdata_myelopathy; Sdata_myelopathy; VIdata_myelopathy];
+    
+    ymax = max([Cdata(:); ...
+        Hdata_stenosis(:); HSdata_stenosis(:); Sdata_stenosis(:); VIdata_stenosis(:); ...
+        Hdata_compression(:); HSdata_compression(:); Sdata_compression(:); VIdata_compression(:); ...
+        Hdata_myelopathy(:); HSdata_myelopathy(:); Sdata_myelopathy(:); VIdata_myelopathy(:); ...
+        ]);
+    
+    subplot(2,4,sbpl)
+    plot([0.60 1.40],[mean(Cdata(:),'omitnan') mean(Cdata(:),'omitnan')],'k','LineWidth',5)
+    hold on
+    plot([1.60 2.40],[mean(STENdata(:),'omitnan') mean(STENdata(:),'omitnan')],'k','LineWidth',5)
+    plot([2.60 3.40],[mean(COMPdata(:),'omitnan') mean(COMPdata(:),'omitnan')],'k','LineWidth',5)
+    plot([3.60 4.40],[mean(MYELdata(:),'omitnan') mean(MYELdata(:),'omitnan')],'k','LineWidth',5)
+    scatter(ones(size(Cdata(:))),Cdata(:),mrk_size,'v','MarkerEdgeColor',clr_hc,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(Hdata_stenosis(:))),Hdata_stenosis(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(HSdata_stenosis(:))),HSdata_stenosis(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(Sdata_stenosis(:))),Sdata_stenosis(:),mrk_size,'d','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(VIdata_stenosis(:))),VIdata_stenosis(:),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    
+    scatter(3*ones(size(Hdata_compression(:))),Hdata_compression(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(HSdata_compression(:))),HSdata_compression(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(Sdata_compression(:))),Sdata_compression(:),mrk_size,'d','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(VIdata_compression(:))),VIdata_compression(:),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    
+    scatter(4*ones(size(Hdata_myelopathy(:))),Hdata_myelopathy(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(4*ones(size(HSdata_myelopathy(:))),HSdata_myelopathy(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(4*ones(size(Sdata_myelopathy(:))),Sdata_myelopathy(:),mrk_size,'d','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(4*ones(size(VIdata_myelopathy(:))),VIdata_myelopathy(:),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    
+    if pT_measurement_stenosis(1,vr(1,ind)) < 0.05
+        text(2,0.96*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
+    end
+    if pT_measurement_compression(1,vr(1,ind)) < 0.05
+        text(3,0.96*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
+    end
+    if pT_measurement_myelopathy(1,vr(1,ind)) < 0.05
+        text(4,0.96*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
+    end
+    
+    hold off
+    ylabel(measurement_names{1,vr(1,ind)})
+    xlim([0.5 4.5])
+    grid on
+    set(gca,'XTick',1:4,'XTickLabel',{'Healthy controls','Stenosis','Compression','Myelopathy'})
+    xtickangle(45)
+    set(gca,'FontSize',16,'LineWidth',2)
+    
+    if sbpl == 3
+        sbpl = sbpl + 3;
+    else
+        sbpl = sbpl + 1;
+    end
+end
+
+print(fullfile(save_path,['graph' num2str(fgrs+13) '-commpresion-manualmeasurement-differences' ]),'-dpng','-r300')
+pause(0.15)
+close(h(fgrs+13).fig)
+pause(0.1)
+disp(num2str(fgrs+13))
