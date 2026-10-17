@@ -4,12 +4,13 @@ clear all; clc; close all;
 % subid_mps(strcmp(table2cell(clintbl(:,'Compression')),'no') & strcmp(mpsitype_mps,'HS'))
 
 % save('data_mps_for_thierry.mat','data_mps','data_hc','data_names','pss_mps','grp_mps','age_hc','age_mps','height_hc','height_mps','weight_hc','weight_mps','sex_hc','sex_mps','mri_corr','mri_corr_names')
-data_folder='/home/range1-raid1/labounek/data-on-porto';
+data_folder='/home/naxos3-raid1/labounek/data-on-porto';
 project_folder=fullfile(data_folder,'MPS','cspine_resolve');
 
 
 xls_file = fullfile(project_folder,'results','cspine_resolve.xlsx');
-save_path = fullfile(project_folder,'pictures','graphs-20241113');
+% save_path = fullfile(project_folder,'pictures','graphs-20241113');
+save_path = fullfile(project_folder,'pictures','graphs-20261012');
 pvaladjust_file = fullfile(project_folder,'results','pvaladjust-20241113.mat');
 clintable_file = fullfile(project_folder,'results','MPS-C-spine-Rene-table2.csv');
 
@@ -17,21 +18,26 @@ clintable_file = fullfile(project_folder,'results','MPS-C-spine-Rene-table2.csv'
 % save_path = fullfile(project_folder,'pictures','graphs-20241001_all_matched');
 % pvaladjust_file = fullfile(project_folder,'results','pvaladjust-20241001_all_matched.mat');
 
-aim2_hc_result_file = ('/home/range1-raid1/labounek/data-on-porto/MPS/cspine_brain/tables/aim2_csa-SC_T2w.mat');
+aim2_hc_result_file = ('/home/naxos3-raid1/labounek/data-on-porto/MPS/cspine_brain/tables/aim2_csa-SC_T2w.mat');
 
 
 dmripreproc='topup-eddy';
 roidefinition='level-specific';
 
-% addpath('/home/range1-raid1/labounek/toolbox/matlab/spm12');
+% addpath('/home/naxos3-raid1/labounek/toolbox/matlab/spm12');
 
 graph_specific_sub = 0;
 show_sub = '2MPS1041';
 
 clr_hc = [0 0.749 1];
 clr_mpsi = [1 1 1]*0.4;
+clr_mpsi_h = [1 1 1]*0.4;
+clr_mpsi_hs = [255 153 51]/255*0.9;
+clr_mpsi_s = [255 0 255]/255*0.9;
 clr_mpsvi = [255 0 0]/255;
 clr_stats = [0 220 0]/255;
+
+mrk_size = 140;
 
 xmin = -0.5;
 xmax = 4.5;
@@ -510,13 +516,16 @@ for varind = 1:size(data_mps,4)
         for ps = 1:size(y,1)
             if grp_mps(ps) == 0 || grp_mps(ps) == 1
                 if strcmp(mpsitype_mps{ps,1},'H')
-                    mrk = ':^';
+                    mrk = ':o';
+                    clr = clr_mpsi_h;
                 elseif strcmp(mpsitype_mps{ps,1},'HS')
                     mrk = ':o';
+                    clr = clr_mpsi_hs;
                 elseif strcmp(mpsitype_mps{ps,1},'S')
-                    mrk = ':d';
+                    mrk = ':o';
+                    clr = clr_mpsi_s;
                 end
-                clr = clr_mpsi;
+%                 clr = clr_mpsi;
             elseif grp_mps(ps) == 6
                 mrk = ':x';
                 clr = clr_mpsvi;
@@ -612,9 +621,9 @@ for varind = 1:size(data_mps,4)
     hold on
     plot([-0.4 0.4],[yhc_std yhc_std],'-.','Color',clr_stats,'LineWidth',3)
     plot(0,0,'v','Color',clr_hc,'LineWidth',3,'MarkerSize',13)
-    plot([0.5 1.5],[0 0],':^','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
-    plot([0.5 1.5],[0 0],':o','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
-    plot([0.5 1.5],[0 0],':d','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
+    plot([0.5 1.5],[0 0],':o','Color',clr_mpsi_h,'LineWidth',3,'MarkerSize',13)
+    plot([0.5 1.5],[0 0],':o','Color',clr_mpsi_hs,'LineWidth',3,'MarkerSize',13)
+    plot([0.5 1.5],[0 0],':o','Color',clr_mpsi_s,'LineWidth',3,'MarkerSize',13)
     plot([1.5 2.5],[0 0],':x','Color',clr_mpsvi,'LineWidth',3,'MarkerSize',13)
     plot(1,1,'+','Color','k','LineWidth',3,'MarkerSize',11)
     plot(1,1,'>','Color','k','LineWidth',2,'MarkerSize',11,'MarkerFaceColor','k')
@@ -788,17 +797,17 @@ for vr = 1:size(pT,2)
     end
     
     if graph_specific_sub == 1
-        plot(x,g_showsub,'--d','Color',clr_mpsi,'Linewidth',3,'MarkerSize',11)
+        plot(x,g_showsub,'--d','Color',clr_mpsi_s,'Linewidth',3,'MarkerSize',11)
     end
     
     hold off
     grid on
     ylabel(g_ylbl{vr,1})
     if vr < size(pT,2)-1
-        set(gca,'Fontsize',12,'LineWidth',2,'XTick',1:size(pT,1),'XTickLabel','')
+        set(gca,'Fontsize',16,'LineWidth',2,'XTick',1:size(pT,1),'XTickLabel','')
     else
         xlabel('Cervical level')
-        set(gca,'Fontsize',12,'LineWidth',2,'XTick',1:size(pT,1),'XTickLabel',{'C1' 'C2' 'C3' 'C4' 'C5' 'C6' 'C7'})
+        set(gca,'Fontsize',16,'LineWidth',2,'XTick',1:size(pT,1),'XTickLabel',{'C1' 'C2' 'C3' 'C4' 'C5' 'C6' 'C7'})
     end
     axis([x(1)-0.5 x(end)+0.5 axismat_err(vr,3) axismat_err(vr,4)])
 end
@@ -811,7 +820,7 @@ plot(1,1,'+','Color','k','LineWidth',3,'MarkerSize',11)
 plot(1,1,'>','Color','k','LineWidth',2,'MarkerSize',11,'MarkerFaceColor','k')
 plot(1,1,'s','Color','k','LineWidth',2,'MarkerSize',11,'MarkerFaceColor','k')
 if graph_specific_sub == 1
-    plot(1,1,'--d','Color',clr_mpsi,'LineWidth',3,'MarkerSize',11)
+    plot(1,1,'--d','Color',clr_mpsi_s,'LineWidth',3,'MarkerSize',11)
 end
 hold off
 if graph_specific_sub ~= 1
@@ -824,7 +833,7 @@ else
         show_sub(2:end),...
         'Location','northwest')
 end
-set(gca,'FontSize',14,'LineWidth',2)
+set(gca,'FontSize',20,'LineWidth',2)
 axis([-101 -100 -101 -100]);
 axis off
 
@@ -850,9 +859,9 @@ yy = q(1).*xx + q(2);
 subplot(1,4,1)
 plot(xx,yy,'k-.','LineWidth',3)
 hold on
-plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),'^','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
-plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),'o','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
-plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),'d','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
+plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),'o','Color',clr_mpsi_h,'MarkerSize',14,'LineWidth',4)
+plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),'o','Color',clr_mpsi_hs,'MarkerSize',14,'LineWidth',4)
+plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),'o','Color',clr_mpsi_s,'MarkerSize',14,'LineWidth',4)
 plot(xdata(grp_mps==6,1),ydata(grp_mps==6,1),'rx','MarkerSize',14,'LineWidth',4)
 text(0.99*xx(2),0.98*max(ydata),['\rho=' num2str(r_pss_v2(lvl,vr),'%.3f') '; p=' num2str(p_r_pss_v2(lvl,vr),'%.3f') ],'HorizontalAlign','right','FontSize',14)
 text(0.99*xx(2),0.95*max(ydata),['p_{A|Age}=' num2str(pANCOVA_pss_v2(lvl,vr),'%.3f') ],'HorizontalAlign','right','FontSize',14)
@@ -870,9 +879,9 @@ yy = q(1).*xx + q(2);
 subplot(1,4,2)
 plot(xx,yy,'k-.','LineWidth',3)
 hold on
-plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),'^','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
-plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),'o','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
-plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),'d','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
+plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),'o','Color',clr_mpsi_h,'MarkerSize',14,'LineWidth',4)
+plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),'o','Color',clr_mpsi_hs,'MarkerSize',14,'LineWidth',4)
+plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),'o','Color',clr_mpsi_s,'MarkerSize',14,'LineWidth',4)
 plot(xdata(grp_mps==6,1),ydata(grp_mps==6,1),'rx','MarkerSize',14,'LineWidth',4)
 text(0.99*xx(2),0.98*max(ydata),['\rho=' num2str(r_pss_v2(lvl,vr),'%.3f') '; p=' num2str(p_r_pss_v2(lvl,vr),'%.3f') ],'HorizontalAlign','right','FontSize',14)
 text(0.99*xx(2),0.96*max(ydata),['p_{A|Age}=' num2str(pANCOVA_pss_v2(lvl,vr),'%.3f') ],'HorizontalAlign','right','FontSize',14)
@@ -890,9 +899,9 @@ yy = q(1).*xx + q(2);
 subplot(1,4,3)
 plot(xx,yy,'k-.','LineWidth',3)
 hold on
-plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),'^','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
-plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),'o','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
-plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),'d','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
+plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),'o','Color',clr_mpsi_h,'MarkerSize',14,'LineWidth',4)
+plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),'o','Color',clr_mpsi_hs,'MarkerSize',14,'LineWidth',4)
+plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),'o','Color',clr_mpsi_s,'MarkerSize',14,'LineWidth',4)
 plot(xdata(grp_mps==6,1),ydata(grp_mps==6,1),'rx','MarkerSize',14,'LineWidth',4)
 text(0.99*xx(2),0.97*max(ydata),['\rho=' num2str(r_pss_v2(lvl,vr),'%.3f') '; p=' num2str(p_r_pss_v2(lvl,vr),'%.3f') ],'HorizontalAlign','right','FontSize',14)
 text(0.99*xx(2),0.94*max(ydata),['p_{A|Age}=' num2str(pANCOVA_pss_v2(lvl,vr),'%.3f') ],'HorizontalAlign','right','FontSize',14)
@@ -904,10 +913,10 @@ grid on
 set(gca,'FontSize',14,'LineWidth',2)
 
 subplot(1,4,4)
-plot([1.5 2.5],[0 0],'^','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
+plot([1.5 2.5],[0 0],'o','Color',clr_mpsi_h,'LineWidth',3,'MarkerSize',13)
 hold on
-plot([1.5 2.5],[0 0],'o','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
-plot([1.5 2.5],[0 0],'d','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
+plot([1.5 2.5],[0 0],'o','Color',clr_mpsi_hs,'LineWidth',3,'MarkerSize',13)
+plot([1.5 2.5],[0 0],'o','Color',clr_mpsi_s,'LineWidth',3,'MarkerSize',13)
 plot([1.5 2.5],[0 0],'x','Color','r','LineWidth',3,'MarkerSize',13)
 hold off
 legend('MPS I - Hurler syndrome','MPS I - Hurler-Scheie syndrome','MPS I - Scheie syndrome',...
@@ -955,13 +964,16 @@ for varind = 1:size(measurement,2)
     for ps = 1:size(y,1)
         if grp_mps(ps) == 0 || grp_mps(ps) == 1
             if strcmp(mpsitype_mps{ps,1},'H')
-                mrk = ':^';
+                mrk = ':o';
+                clr = clr_mpsi_h;
             elseif strcmp(mpsitype_mps{ps,1},'HS')
                 mrk = ':o';
+                clr = clr_mpsi_hs;
             elseif strcmp(mpsitype_mps{ps,1},'S')
-                mrk = ':d';
+                mrk = ':o';
+                clr = clr_mpsi_s;
             end
-            clr = clr_mpsi;
+%             clr = clr_mpsi;
         elseif grp_mps(ps) == 6
             mrk = ':x';
             clr = clr_mpsvi;
@@ -1030,9 +1042,9 @@ plot([-0.4 0.4],[yhc_mean yhc_mean],'Color',clr_stats,'LineWidth',5)
 hold on
 plot([-0.4 0.4],[yhc_std yhc_std],'-.','Color',clr_stats,'LineWidth',3)
 plot(0,0,'v','Color',clr_hc,'LineWidth',3,'MarkerSize',13)
-plot([0.5 1.5],[0 0],':^','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
-plot([0.5 1.5],[0 0],':o','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
-plot([0.5 1.5],[0 0],':d','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
+plot([0.5 1.5],[0 0],':o','Color',clr_mpsi_h,'LineWidth',3,'MarkerSize',13)
+plot([0.5 1.5],[0 0],':o','Color',clr_mpsi_hs,'LineWidth',3,'MarkerSize',13)
+plot([0.5 1.5],[0 0],':o','Color',clr_mpsi_s,'LineWidth',3,'MarkerSize',13)
 plot([1.5 2.5],[0 0],':x','Color',clr_mpsvi,'LineWidth',3,'MarkerSize',13)
 plot(1,1,'+','Color','k','LineWidth',3,'MarkerSize',11)
 plot(1,1,'>','Color','k','LineWidth',2,'MarkerSize',11,'MarkerFaceColor','k')
@@ -1112,7 +1124,7 @@ for varind = 1:size(measurement,2)
         end
     end
     if graph_specific_sub == 1
-        plot(2,y_showsub,'d','Color',clr_mpsi,'Linewidth',3,'MarkerSize',11)
+        plot(2,y_showsub,'o','Color',clr_mpsi_s,'Linewidth',3,'MarkerSize',11)
     end
     grid on
     hold off
@@ -1319,11 +1331,16 @@ data_reduced(:,18)=age_ancova;
 % % data_reduced(:,19)=female_ancova;
 
 [r_corr_reduced, p_corr_reduced] = corrcoef(data_reduced,'Rows','pairwise');
-% data_reduced_norm = ( data_reduced - repmat(mean(data_reduced,'omitnan'),size(data_reduced,1),1) ) ./ repmat(std(data_reduced,'omitnan'),size(data_reduced,1),1) ;
+data_reduced_norm = ( data_reduced - repmat(mean(data_reduced,'omitnan'),size(data_reduced,1),1) ) ./ repmat(std(data_reduced,'omitnan'),size(data_reduced,1),1) ;
 %% PCA and FACTORAN analysis
 [coeff,latent,explained] = pcacov(r_corr_reduced);
+score = data_reduced_norm * coeff;
+score_scaled = score./(max(abs(score(:)))*2);
+score_scaled_mps = score_scaled(1:size(data_mps,1),:);
+score_scaled_hc = score_scaled(size(data_mps,1)+1:end,:);
 % [coeff,score,latent,tsquared,explained,mu] = pca(fctrn);
 explained_cumulative = cumsum(explained);
+
 
 h(fgrs+4).fig = figure(fgrs+4);
 set(h(fgrs+4).fig, 'Position', [10, 50, 2050, 800]);
@@ -1333,6 +1350,11 @@ hold on
 plot([0 0],[-1 1],'k','LineWidth',3)
 plot([-1 1],[1 -1],'--','LineWidth',3,'Color',[0.6 0.6 0.6])
 plot([-1 1],[-1 1],'--','LineWidth',3,'Color',[0.6 0.6 0.6])
+scatter(score_scaled_hc(:,1),score_scaled_hc(:,2),mrk_size,'v','MarkerEdgeColor',clr_hc,'LineWidth',4,'MarkerEdgeAlpha',0.5)
+scatter(score_scaled_mps(strcmp(mpsitype_mps,'H'),1),score_scaled_mps(strcmp(mpsitype_mps,'H'),2),mrk_size,'o','MarkerEdgeColor',clr_mpsi_h,'LineWidth',4,'MarkerEdgeAlpha',0.5)
+scatter(score_scaled_mps(strcmp(mpsitype_mps,'HS'),1),score_scaled_mps(strcmp(mpsitype_mps,'HS'),2),mrk_size,'o','MarkerEdgeColor',clr_mpsi_hs,'LineWidth',4,'MarkerEdgeAlpha',0.5)
+scatter(score_scaled_mps(strcmp(mpsitype_mps,'S'),1),score_scaled_mps(strcmp(mpsitype_mps,'S'),2),mrk_size,'o','MarkerEdgeColor',clr_mpsi_s,'LineWidth',4,'MarkerEdgeAlpha',0.5)
+scatter(score_scaled_mps(grp_mps==6,1),score_scaled_mps(grp_mps==6,2),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5)
 % biplot(coeff(:,[1 2]),'Scores',score(:,1:2),'VarLabels',data_reduced_names,'LineWidth',3,'MarkerSize',30)
 bp=biplot(coeff(:,[1 2]),'VarLabels',data_reduced_names,'LineWidth',3,'MarkerSize',30);
 for ind = 1:(size(bp,1))
@@ -1519,9 +1541,9 @@ for ind = 1:size(lvl,1)
     subplot(3,4,sbpl)
     plot(xx,yy,'k-.','LineWidth',3)
     hold on
-    plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),'^','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
-    plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),'o','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
-    plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),'d','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
+    plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),'o','Color',clr_mpsi_h,'MarkerSize',14,'LineWidth',4)
+    plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),'o','Color',clr_mpsi_hs,'MarkerSize',14,'LineWidth',4)
+    plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),'o','Color',clr_mpsi_s,'MarkerSize',14,'LineWidth',4)
     plot(xdata(grp_mps==6,1),ydata(grp_mps==6,1),'rx','MarkerSize',14,'LineWidth',4)
     if q(1) > 0
         if max(ydata)> 1.5
@@ -1551,10 +1573,10 @@ for ind = 1:size(lvl,1)
 end
 
 % subplot(3,3,9)
-% plot([1.5 2.5],[0 0],'^','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
+% plot([1.5 2.5],[0 0],'o','Color',clr_mpsi_h,'LineWidth',3,'MarkerSize',13)
 % hold on
-% plot([1.5 2.5],[0 0],'o','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
-% plot([1.5 2.5],[0 0],'d','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
+% plot([1.5 2.5],[0 0],'o','Color',clr_mpsi_hs,'LineWidth',3,'MarkerSize',13)
+% plot([1.5 2.5],[0 0],'o','Color',clr_mpsi_s,'LineWidth',3,'MarkerSize',13)
 % plot([1.5 2.5],[0 0],'x','Color','r','LineWidth',3,'MarkerSize',13)
 % hold off
 % legend('MPS I - Hurler syndrome','MPS I - Hurler-Scheie syndrome','MPS I - Scheie syndrome',...
@@ -1593,8 +1615,8 @@ for ind = 1:size(lvl,1)
     subplot(2,7,sbpl)
     plot(ones(size(Cdata)),Cdata,'v','Color',clr_hc,'MarkerSize',14,'LineWidth',4)
     hold on
-    plot(2*ones(size(Hdata)),Hdata,'^','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
-    plot(3*ones(size(HSdata)),HSdata,'o','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
+    plot(2*ones(size(Hdata)),Hdata,'o','Color',clr_mpsi_h,'MarkerSize',14,'LineWidth',4)
+    plot(3*ones(size(HSdata)),HSdata,'o','Color',clr_mpsi_hs,'MarkerSize',14,'LineWidth',4)
     plot(4*ones(size(VIdata)),VIdata,'x','Color',clr_mpsvi,'MarkerSize',14,'LineWidth',4)
     if pT_HS(lvl(ind,1),vr(ind,1)) < 0.05
         text(3,0.97*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
@@ -1632,8 +1654,8 @@ for ind = 1:size(vr,2)
     subplot(2,7,sbpl)
     plot(ones(size(Cdata)),Cdata,'v','Color',clr_hc,'MarkerSize',14,'LineWidth',4)
     hold on
-    plot(2*ones(size(Hdata)),Hdata,'^','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
-    plot(3*ones(size(HSdata)),HSdata,'o','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
+    plot(2*ones(size(Hdata)),Hdata,'o','Color',clr_mpsi_h,'MarkerSize',14,'LineWidth',4)
+    plot(3*ones(size(HSdata)),HSdata,'o','Color',clr_mpsi_hs,'MarkerSize',14,'LineWidth',4)
     plot(4*ones(size(VIdata)),VIdata,'x','Color',clr_mpsvi,'MarkerSize',14,'LineWidth',4)
     if pT_measurement_HS(1,vr(1,ind)) < 0.05
         text(3,0.97*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
@@ -1679,8 +1701,8 @@ for ind = 1:size(lvl,1)
     subplot(2,7,sbpl)
     plot(ones(size(Cdata)),Cdata,'v','Color',clr_hc,'MarkerSize',14,'LineWidth',4)
     hold on
-    plot(2*ones(size(Hdata)),Hdata,'^','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
-    plot(3*ones(size(HSdata)),Sdata,'d','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
+    plot(2*ones(size(Hdata)),Hdata,'o','Color',clr_mpsi_h,'MarkerSize',14,'LineWidth',4)
+    plot(3*ones(size(HSdata)),Sdata,'o','Color',clr_mpsi_s,'MarkerSize',14,'LineWidth',4)
     if pT_S(lvl(ind,1),vr(ind,1)) < 0.05
         text(3,0.99*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
     end
@@ -1709,8 +1731,8 @@ for ind = 1:size(vr,2)
     subplot(2,7,sbpl)
     plot(ones(size(Cdata)),Cdata,'v','Color',clr_hc,'MarkerSize',14,'LineWidth',4)
     hold on
-    plot(2*ones(size(Hdata)),Hdata,'^','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
-    plot(3*ones(size(Sdata)),Sdata,'d','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
+    plot(2*ones(size(Hdata)),Hdata,'o','Color',clr_mpsi_h,'MarkerSize',14,'LineWidth',4)
+    plot(3*ones(size(Sdata)),Sdata,'o','Color',clr_mpsi_s,'MarkerSize',14,'LineWidth',4)
     if pT_measurement_S(1,vr(1,ind)) < 0.05
         if ymax > 15
             text(3,0.92*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
@@ -1739,17 +1761,30 @@ disp(num2str(fgrs+8))
 %% Show H and HS syndromes and MPS VI - aggregated data
 
 vr = find(pT_HS_agr < 0.05)';
-mrk_size = 140;
+
+stats_genotype_effect_sizes{1,2} = 'Controls vs. Hurler';
+stats_genotype_effect_sizes{1,3} = 'Controls vs. Hurler-Scheie';
+stats_genotype_effect_sizes{1,4} = 'Controls vs. VI';
+stats_genotype_effect_sizes{1,5} = 'Hurler vs. Hurler-Scheie';
+stats_genotype_effect_sizes{1,6} = 'Hurler vs. VI';
 
 h(fgrs+9).fig = figure(fgrs+9);
 set(h(fgrs+9).fig,'Position',[1000 40 1200 1200])
 
+% p_phenotypue_thr = 0.05/3;
+p_phenotypue_thr = 0.05;
 sbpl = 1;
 for ind = 1:size(vr,1)   
     Cdata = CC(:,:,vr(ind,1));
     Hdata = YY_H(:,:,vr(ind,1));
     HSdata = YY_HS(:,:,vr(ind,1));
     VIdata = YY_VI(:,:,vr(ind,1));
+    
+    [~, tmp_pT_H] = ttest2(Cdata(:),Hdata(:));
+    [~, tmp_pT_HS] = ttest2(Cdata(:),HSdata(:));
+    [~, tmp_pT_VI] = ttest2(Cdata(:),VIdata(:));
+    
+    [~,~,~,tmp_pT_gen_control] = fdr_bh([tmp_pT_H tmp_pT_HS tmp_pT_VI pT_HS_agr(1,vr(ind,1)) pT_VI_agr(1,vr(ind,1)) ]);
     
     ymax = max([Cdata(:);Hdata(:); HSdata(:); VIdata(:)]);
     
@@ -1760,14 +1795,31 @@ for ind = 1:size(vr,1)
     plot([2.60 3.40],[mean(HSdata(:),'omitnan') mean(HSdata(:),'omitnan')],'k','LineWidth',5)
     plot([3.60 4.40],[mean(VIdata(:),'omitnan') mean(VIdata(:),'omitnan')],'k','LineWidth',5)
     scatter(ones(size(Cdata(:))),Cdata(:),mrk_size,'v','MarkerEdgeColor',clr_hc,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(2*ones(size(Hdata(:))),Hdata(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(3*ones(size(HSdata(:))),HSdata(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(Hdata(:))),Hdata(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_h,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(HSdata(:))),HSdata(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_hs,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
     scatter(4*ones(size(VIdata(:))),VIdata(:),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    if pT_HS_agr(1,vr(ind,1)) < 0.05
-        text(3,0.96*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
+
+    stats_genotype_effect_sizes{ind+1,1} = data_names{1,vr(ind,1)};
+    stats_genotype_effect_sizes{ind+1,2} = estimate_effect_sizes(Cdata(:),Hdata(:),'%.2f',tmp_pT_gen_control(1,1));
+    stats_genotype_effect_sizes{ind+1,3} = estimate_effect_sizes(Cdata(:),HSdata(:),'%.2f',tmp_pT_gen_control(1,2));
+    stats_genotype_effect_sizes{ind+1,4} = estimate_effect_sizes(Cdata(:),VIdata(:),'%.2f',tmp_pT_gen_control(1,3));
+    stats_genotype_effect_sizes{ind+1,5} = estimate_effect_sizes(Hdata(:),HSdata(:),'%.2f',tmp_pT_gen_control(1,4));
+    stats_genotype_effect_sizes{ind+1,6} = estimate_effect_sizes(Hdata(:),VIdata(:),'%.2f',tmp_pT_gen_control(1,5));
+
+    if tmp_pT_gen_control(1,4) < p_phenotypue_thr
+        text(3.2,0.96*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
     end
-    if pT_VI_agr(1,vr(ind,1)) < 0.05
-        text(4,0.96*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
+    if tmp_pT_gen_control(1,5) < p_phenotypue_thr
+        text(4.2,0.96*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
+    end
+    if tmp_pT_gen_control(1,1) < p_phenotypue_thr
+        text(1.8,0.98*ymax,'+','Fontsize',22,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
+    end
+    if tmp_pT_gen_control(1,2) < p_phenotypue_thr
+        text(2.8,0.98*ymax,'+','Fontsize',22,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
+    end
+    if tmp_pT_gen_control(1,3) < p_phenotypue_thr
+        text(3.8,0.98*ymax,'+','Fontsize',22,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
     end
     hold off
     ylabel(['C1-C7 ' g_ylbl{vr(ind,1),1}])
@@ -1794,6 +1846,12 @@ for ind = 1:size(vr,2)
     HSdata = ydata(strcmp(mpsitype_mps,'HS'),1);
     VIdata = ydata(grp_mps==6,1);
     
+    [~, tmp_pT_H] = ttest2(Cdata(:),Hdata(:));
+    [~, tmp_pT_HS] = ttest2(Cdata(:),HSdata(:));
+    [~, tmp_pT_VI] = ttest2(Cdata(:),VIdata(:));
+    
+    [~,~,~,tmp_pT_gen_control] = fdr_bh([tmp_pT_H tmp_pT_HS tmp_pT_VI pT_measurement_HS(1,vr(1,ind)) pT_measurement_VI(1,vr(1,ind))]);
+    
     ymax = max([Cdata;Hdata; HSdata; VIdata]);
     
     subplot(2,3,sbpl)
@@ -1803,14 +1861,34 @@ for ind = 1:size(vr,2)
     plot([2.60 3.40],[mean(HSdata,'omitnan') mean(HSdata,'omitnan')],'k','LineWidth',5)
     plot([3.60 4.40],[mean(VIdata,'omitnan') mean(VIdata,'omitnan')],'k','LineWidth',5)
     scatter(ones(size(Cdata(:))),Cdata(:),mrk_size,'v','MarkerEdgeColor',clr_hc,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(2*ones(size(Hdata(:))),Hdata(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(3*ones(size(HSdata(:))),HSdata(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(Hdata(:))),Hdata(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_h,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(HSdata(:))),HSdata(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_hs,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
     scatter(4*ones(size(VIdata(:))),VIdata(:),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    if pT_measurement_HS(1,vr(1,ind)) < 0.05
-        text(3,0.97*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
+    
+    stats_genotype_effect_sizes{ind+4,1} = measurement_names{1,vr(1,ind)};
+    stats_genotype_effect_sizes{ind+4,2} = estimate_effect_sizes(Cdata(:),Hdata(:),'%.2f',tmp_pT_gen_control(1,1));
+    stats_genotype_effect_sizes{ind+4,3} = estimate_effect_sizes(Cdata(:),HSdata(:),'%.2f',tmp_pT_gen_control(1,2));
+    stats_genotype_effect_sizes{ind+4,4} = estimate_effect_sizes(Cdata(:),VIdata(:),'%.2f',tmp_pT_gen_control(1,3));
+    stats_genotype_effect_sizes{ind+4,5} = estimate_effect_sizes(Hdata(:),HSdata(:),'%.2f',tmp_pT_gen_control(1,4));
+    stats_genotype_effect_sizes{ind+4,6} = estimate_effect_sizes(Hdata(:),VIdata(:),'%.2f',tmp_pT_gen_control(1,5));
+    
+    tmp_y_coef = 0.96;
+    if tmp_pT_gen_control(1,4) < p_phenotypue_thr
+        tmp_y_coef = 0.96;
+        text(3.2,tmp_y_coef*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
     end
-    if pT_measurement_VI(1,vr(1,ind)) < 0.05
-        text(4,0.92*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
+    if tmp_pT_gen_control(1,5) < p_phenotypue_thr
+        tmp_y_coef = 0.92;
+        text(4.2,tmp_y_coef*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
+    end
+    if tmp_pT_gen_control(1,1) < p_phenotypue_thr
+        text(1.8,(tmp_y_coef+0.02)*ymax,'+','Fontsize',22,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
+    end
+    if tmp_pT_gen_control(1,2) < p_phenotypue_thr
+        text(2.8,(tmp_y_coef+0.02)*ymax,'+','Fontsize',22,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
+    end
+    if tmp_pT_gen_control(1,3) < p_phenotypue_thr
+        text(3.8,(tmp_y_coef+0.02)*ymax,'+','Fontsize',22,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
     end
     hold off
     ylabel(measurement_names{1,vr(1,ind)})
@@ -1835,14 +1913,24 @@ disp(num2str(fgrs+9))
 vr = find(pT_S_agr < 0.05)';
 mrk_size = 140;
 
+stats_genotype2_effect_sizes{1,2} = 'Controls vs. Hurler';
+stats_genotype2_effect_sizes{1,3} = 'Controls vs. Scheie';
+stats_genotype2_effect_sizes{1,4} = 'Hurler vs. Scheie';
+
 h(fgrs+10).fig = figure(fgrs+10);
 set(h(fgrs+10).fig,'Position',[1000 40 1200 1200])
 
+% p_phenotypue_thr = 0.05/2;
 sbpl = 1;
 for ind = 1:size(vr,1)   
     Cdata = CC_fS(:,:,vr(ind,1));
     Hdata = YY_HfS(:,:,vr(ind,1));
     Sdata = YY_S(:,:,vr(ind,1));
+    
+    [~, tmp_pT_H] = ttest2(Cdata(:),Hdata(:));
+    [~, tmp_pT_S] = ttest2(Cdata(:),Sdata(:));
+    
+    [~,~,~,tmp_pT_gen_control] = fdr_bh([tmp_pT_H tmp_pT_S pT_S_agr(1,vr(ind,1))]);
     
     ymax = max([Cdata(:);Hdata(:); Sdata(:)]);
     
@@ -1852,14 +1940,27 @@ for ind = 1:size(vr,1)
     plot([1.60 2.40],[mean(Hdata(:),'omitnan') mean(Hdata(:),'omitnan')],'k','LineWidth',5)
     plot([2.60 3.40],[mean(Sdata(:),'omitnan') mean(Sdata(:),'omitnan')],'k','LineWidth',5)
     scatter(ones(size(Cdata(:))),Cdata(:),mrk_size,'v','MarkerEdgeColor',clr_hc,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(2*ones(size(Hdata(:))),Hdata(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(3*ones(size(Sdata(:))),Sdata(:),mrk_size,'d','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    if pT_S_agr(1,vr(ind,1)) < 0.05
-        if ymax < 0.7
-            text(3,1.03*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
-        else
-            text(3,0.99*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
-        end
+    scatter(2*ones(size(Hdata(:))),Hdata(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_h,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(Sdata(:))),Sdata(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_s,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    
+    stats_genotype2_effect_sizes{ind+1,1} = data_names{1,vr(ind,1)};
+    stats_genotype2_effect_sizes{ind+1,2} = estimate_effect_sizes(Cdata(:),Hdata(:),'%.2f',tmp_pT_gen_control(1,1));
+    stats_genotype2_effect_sizes{ind+1,3} = estimate_effect_sizes(Cdata(:),Sdata(:),'%.2f',tmp_pT_gen_control(1,2));
+    stats_genotype2_effect_sizes{ind+1,4} = estimate_effect_sizes(Hdata(:),Sdata(:),'%.2f',tmp_pT_gen_control(1,3));
+
+    if ymax < 0.7
+        tmp_y_coef = 1.03;
+    else
+        tmp_y_coef = 0.99;
+    end
+    if tmp_pT_gen_control(1,3) < p_phenotypue_thr
+        text(3.2,tmp_y_coef*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
+    end
+    if tmp_pT_gen_control(1,1) < p_phenotypue_thr
+        text(1.8,(tmp_y_coef+0.02)*ymax,'+','Fontsize',22,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
+    end
+    if tmp_pT_gen_control(1,2) < p_phenotypue_thr
+        text(2.8,(tmp_y_coef+0.02)*ymax,'+','Fontsize',22,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
     end
     hold off
     ylabel(['C1-C7 ' g_ylbl{vr(ind,1),1}])
@@ -1885,6 +1986,11 @@ for ind = 1:size(vr,2)
     Hdata = ydata(strcmp(mpsitype_mps,'H') & age_mps(:,2) > agethr_S1 & age_mps(:,2) < agethr_S2,1);
     Sdata = ydata(strcmp(mpsitype_mps,'S'),1);
     
+    [~, tmp_pT_H] = ttest2(Cdata(:),Hdata(:));
+    [~, tmp_pT_S] = ttest2(Cdata(:),Sdata(:));
+    
+    [~,~,~,tmp_pT_gen_control] = fdr_bh([tmp_pT_H tmp_pT_S pT_measurement_S(1,vr(1,ind))]);
+    
     ymax = max([Cdata;Hdata; Sdata]);
     
     subplot(2,3,sbpl)
@@ -1893,14 +1999,27 @@ for ind = 1:size(vr,2)
     plot([1.60 2.40],[mean(Hdata,'omitnan') mean(Hdata,'omitnan')],'k','LineWidth',5)
     plot([2.60 3.40],[mean(Sdata,'omitnan') mean(Sdata,'omitnan')],'k','LineWidth',5)
     scatter(ones(size(Cdata(:))),Cdata(:),mrk_size,'v','MarkerEdgeColor',clr_hc,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(2*ones(size(Hdata(:))),Hdata(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(3*ones(size(Sdata(:))),Sdata(:),mrk_size,'d','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    if pT_measurement_S(1,vr(1,ind)) < 0.05
-        if ymax > 18
-        	text(3,0.90*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
-        else
-            text(3,0.98*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
-        end
+    scatter(2*ones(size(Hdata(:))),Hdata(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_h,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(Sdata(:))),Sdata(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_s,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    
+    stats_genotype2_effect_sizes{ind+5,1} = measurement_names{1,vr(1,ind)};
+    stats_genotype2_effect_sizes{ind+5,2} = estimate_effect_sizes(Cdata(:),Hdata(:),'%.2f',tmp_pT_gen_control(1,1));
+    stats_genotype2_effect_sizes{ind+5,3} = estimate_effect_sizes(Cdata(:),Sdata(:),'%.2f',tmp_pT_gen_control(1,2));
+    stats_genotype2_effect_sizes{ind+5,4} = estimate_effect_sizes(Hdata(:),Sdata(:),'%.2f',tmp_pT_gen_control(1,3));
+    
+    if ymax > 18
+        tmp_y_coef = 0.90;
+    else
+        tmp_y_coef = 0.98;
+    end
+    if tmp_pT_gen_control(1,3) < p_phenotypue_thr
+        text(3.2,tmp_y_coef*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
+    end
+    if tmp_pT_gen_control(1,1) < p_phenotypue_thr
+        text(1.8,(tmp_y_coef+0.02)*ymax,'+','Fontsize',22,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
+    end
+    if tmp_pT_gen_control(1,2) < p_phenotypue_thr
+        text(2.8,(tmp_y_coef+0.02)*ymax,'+','Fontsize',22,'Fontweight','bold','HorizontalAlignment','center','VerticalAlignment','middle')
     end
     hold off
     ylabel(measurement_names{1,vr(1,ind)})
@@ -1947,21 +2066,31 @@ for ind = [4 6 7]
     subplot(3,4,sbpl)
     plot(xx,yy,'k-.','LineWidth',3)
     hold on
-    plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),'^','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
-    plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),'o','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
-    plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),'d','Color',clr_mpsi,'MarkerSize',14,'LineWidth',4)
+    plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'H'),1),'o','Color',clr_mpsi_h,'MarkerSize',14,'LineWidth',4)
+    plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'HS'),1),'o','Color',clr_mpsi_hs,'MarkerSize',14,'LineWidth',4)
+    plot(xdata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),ydata(grp_mps<=1 & strcmp(mpsitype_mps,'S'),1),'o','Color',clr_mpsi_s,'MarkerSize',14,'LineWidth',4)
     plot(xdata(grp_mps==6,1),ydata(grp_mps==6,1),'rx','MarkerSize',14,'LineWidth',4)
+    if p_r_height_agr(1,ind) < 0.001
+        p_height_string = '; p<0.001';
+    else
+        p_height_string = [ '; p=' num2str(p_r_height_agr(1,ind),'%.3f') ];
+    end
+    if pANCOVA_height_agr(1,ind) < 0.001
+        p_ancova_string = 'p_{A|Age}<0.001';
+    else
+        p_ancova_string = ['p_{A|Age}=' num2str(pANCOVA_height_agr(1,ind),'%.3f') ];
+    end
     if q(1) > 0
         if max(ydata)> 1.5
-            text(0.98*xx(2),1.077*min(ydata),['r=' num2str(r_height_agr(1,ind),'%.3f') '; p=' num2str(p_r_height_agr(1,ind),'%.3f') ],'HorizontalAlign','right','FontSize',14)
-            text(0.98*xx(2),1.03*min(ydata),['p_{A|Age}=' num2str(pANCOVA_height_agr(1,ind),'%.3f') ],'HorizontalAlign','right','FontSize',14)
+            text(0.98*xx(2),1.077*min(ydata),['r=' num2str(r_height_agr(1,ind),'%.3f') p_height_string ],'HorizontalAlign','right','FontSize',14)
+            text(0.98*xx(2),1.03*min(ydata),p_ancova_string,'HorizontalAlign','right','FontSize',14)
         else
-            text(0.98*xx(2),1.13*min(ydata),['r=' num2str(r_height_agr(1,ind),'%.3f') '; p=' num2str(p_r_height_agr(1,ind),'%.3f') ],'HorizontalAlign','right','FontSize',14)
-            text(0.98*xx(2),1.06*min(ydata),['p_{A|Age}=' num2str(pANCOVA_height_agr(1,ind),'%.3f') ],'HorizontalAlign','right','FontSize',14)
+            text(0.98*xx(2),1.13*min(ydata),['r=' num2str(r_height_agr(1,ind),'%.3f') p_height_string ],'HorizontalAlign','right','FontSize',14)
+            text(0.98*xx(2),1.06*min(ydata),p_ancova_string,'HorizontalAlign','right','FontSize',14)
         end
     else
-        text(0.98*xx(2),0.97*max(ydata),['r=' num2str(r_height_agr(1,ind),'%.3f') '; p=' num2str(p_r_height_agr(1,ind),'%.3f') ],'HorizontalAlign','right','FontSize',14)
-        text(0.98*xx(2),0.93*max(ydata),['p_{A|Age}=' num2str(pANCOVA_height_agr(1,ind),'%.3f') ],'HorizontalAlign','right','FontSize',14)
+        text(0.98*xx(2),0.97*max(ydata),['r=' num2str(r_height_agr(1,ind),'%.3f') p_height_string ],'HorizontalAlign','right','FontSize',14)
+        text(0.98*xx(2),0.93*max(ydata),p_ancova_string,'HorizontalAlign','right','FontSize',14)
     end
     hold off
     ylabel(['C4-C7 ' g_ylbl{ind,1}])
@@ -1979,10 +2108,10 @@ for ind = [4 6 7]
 end
 
 subplot(3,4,12)
-plot([1.5 2.5],[0 0],'^','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
+plot([1.5 2.5],[0 0],'o','Color',clr_mpsi_h,'LineWidth',3,'MarkerSize',13)
 hold on
-plot([1.5 2.5],[0 0],'o','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
-plot([1.5 2.5],[0 0],'d','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
+plot([1.5 2.5],[0 0],'o','Color',clr_mpsi_hs,'LineWidth',3,'MarkerSize',13)
+plot([1.5 2.5],[0 0],'o','Color',clr_mpsi_s,'LineWidth',3,'MarkerSize',13)
 plot([1.5 2.5],[0 0],'x','Color','r','LineWidth',3,'MarkerSize',13)
 hold off
 legend('MPS I - Hurler syndrome','MPS I - Hurler-Scheie syndrome','MPS I - Scheie syndrome',...
@@ -2003,6 +2132,13 @@ disp(num2str(fgrs+11))
 
 vr = find(pT_stenosis_agr < 0.05 | pT_compression_agr < 0.05 | pT_myelopathy_agr < 0.05)';
 mrk_size = 140;
+
+stats_myelopathy_effect_sizes{1,2} = 'Controls vs. Stenosis';
+stats_myelopathy_effect_sizes{1,3} = 'Stenosis vs. Compression';
+stats_myelopathy_effect_sizes{1,4} = 'Compression vs. Myelopathy';
+
+% p_thr_compression = 0.05 / 4;
+p_thr_compression = 0.05;
 
 h(fgrs+12).fig = figure(fgrs+12);
 set(h(fgrs+12).fig,'Position',[1000 40 1500 1200])
@@ -2045,30 +2181,37 @@ for ind = 1:size(vr,1)
     plot([2.60 3.40],[mean(COMPdata(:),'omitnan') mean(COMPdata(:),'omitnan')],'k','LineWidth',5)
     plot([3.60 4.40],[mean(MYELdata(:),'omitnan') mean(MYELdata(:),'omitnan')],'k','LineWidth',5)
     scatter(ones(size(Cdata(:))),Cdata(:),mrk_size,'v','MarkerEdgeColor',clr_hc,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(2*ones(size(Hdata_stenosis(:))),Hdata_stenosis(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(2*ones(size(HSdata_stenosis(:))),HSdata_stenosis(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(2*ones(size(Sdata_stenosis(:))),Sdata_stenosis(:),mrk_size,'d','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(Hdata_stenosis(:))),Hdata_stenosis(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_h,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(HSdata_stenosis(:))),HSdata_stenosis(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_hs,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(Sdata_stenosis(:))),Sdata_stenosis(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_s,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
     scatter(2*ones(size(VIdata_stenosis(:))),VIdata_stenosis(:),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
     
-    scatter(3*ones(size(Hdata_compression(:))),Hdata_compression(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(3*ones(size(HSdata_compression(:))),HSdata_compression(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(3*ones(size(Sdata_compression(:))),Sdata_compression(:),mrk_size,'d','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(Hdata_compression(:))),Hdata_compression(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_h,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(HSdata_compression(:))),HSdata_compression(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_hs,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(Sdata_compression(:))),Sdata_compression(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_s,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
     scatter(3*ones(size(VIdata_compression(:))),VIdata_compression(:),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
     
-    scatter(4*ones(size(Hdata_myelopathy(:))),Hdata_myelopathy(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(4*ones(size(HSdata_myelopathy(:))),HSdata_myelopathy(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(4*ones(size(Sdata_myelopathy(:))),Sdata_myelopathy(:),mrk_size,'d','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(4*ones(size(Hdata_myelopathy(:))),Hdata_myelopathy(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_h,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(4*ones(size(HSdata_myelopathy(:))),HSdata_myelopathy(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_hs,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(4*ones(size(Sdata_myelopathy(:))),Sdata_myelopathy(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_s,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
     scatter(4*ones(size(VIdata_myelopathy(:))),VIdata_myelopathy(:),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
     
-    if pT_stenosis_agr(1,vr(ind,1)) < 0.05
+    [~,~,~,tmp_pT_compression] = fdr_bh([pT_stenosis_agr(1,vr(ind,1)) pT_compression_agr(1,vr(ind,1)) pT_myelopathy_agr(1,vr(ind,1)) ]);
+    
+    if tmp_pT_compression(1,1) < p_thr_compression
         text(2,0.97*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
     end
-    if pT_compression_agr(1,vr(ind,1)) < 0.05
+    if tmp_pT_compression(1,2) < p_thr_compression
         text(3,0.97*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
     end
-    if pT_myelopathy_agr(1,vr(ind,1)) < 0.05
+    if tmp_pT_compression(1,3) < p_thr_compression
         text(4,0.97*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
     end
+
+    stats_myelopathy_effect_sizes{ind+1,1} = data_names{1,vr(ind,1)};
+    stats_myelopathy_effect_sizes{ind+1,2} = estimate_effect_sizes(Cdata(:),STENdata(:),'%.2f',tmp_pT_compression(1,1));
+    stats_myelopathy_effect_sizes{ind+1,3} = estimate_effect_sizes(STENdata(:),COMPdata(:),'%.2f',tmp_pT_compression(1,2));
+    stats_myelopathy_effect_sizes{ind+1,4} = estimate_effect_sizes(COMPdata(:),MYELdata(:),'%.2f',tmp_pT_compression(1,3));
 
     hold off
     ylabel(['C1-C7 ' g_ylbl{vr(ind,1),1}])
@@ -2092,9 +2235,9 @@ end
 subplot(2,4,4)
 plot([1.5 2.5],[0 0],'v','Color',clr_hc,'LineWidth',3,'MarkerSize',13)
 hold on
-plot([1.5 2.5],[0 0],'^','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
-plot([1.5 2.5],[0 0],'o','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
-plot([1.5 2.5],[0 0],'d','Color',clr_mpsi,'LineWidth',3,'MarkerSize',13)
+plot([1.5 2.5],[0 0],'o','Color',clr_mpsi_h,'LineWidth',3,'MarkerSize',13)
+plot([1.5 2.5],[0 0],'o','Color',clr_mpsi_hs,'LineWidth',3,'MarkerSize',13)
+plot([1.5 2.5],[0 0],'o','Color',clr_mpsi_s,'LineWidth',3,'MarkerSize',13)
 plot([1.5 2.5],[0 0],'x','Color','r','LineWidth',3,'MarkerSize',13)
 hold off
 legend('Healthy control','MPS I - Hurler syndrome','MPS I - Hurler-Scheie syndrome','MPS I - Scheie syndrome',...
@@ -2156,28 +2299,35 @@ for ind = 1:size(vr,2)
     plot([2.60 3.40],[mean(COMPdata(:),'omitnan') mean(COMPdata(:),'omitnan')],'k','LineWidth',5)
     plot([3.60 4.40],[mean(MYELdata(:),'omitnan') mean(MYELdata(:),'omitnan')],'k','LineWidth',5)
     scatter(ones(size(Cdata(:))),Cdata(:),mrk_size,'v','MarkerEdgeColor',clr_hc,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(2*ones(size(Hdata_stenosis(:))),Hdata_stenosis(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(2*ones(size(HSdata_stenosis(:))),HSdata_stenosis(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(2*ones(size(Sdata_stenosis(:))),Sdata_stenosis(:),mrk_size,'d','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(Hdata_stenosis(:))),Hdata_stenosis(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_h,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(HSdata_stenosis(:))),HSdata_stenosis(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_hs,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(2*ones(size(Sdata_stenosis(:))),Sdata_stenosis(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_s,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
     scatter(2*ones(size(VIdata_stenosis(:))),VIdata_stenosis(:),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
     
-    scatter(3*ones(size(Hdata_compression(:))),Hdata_compression(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(3*ones(size(HSdata_compression(:))),HSdata_compression(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(3*ones(size(Sdata_compression(:))),Sdata_compression(:),mrk_size,'d','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(Hdata_compression(:))),Hdata_compression(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_h,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(HSdata_compression(:))),HSdata_compression(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_hs,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(3*ones(size(Sdata_compression(:))),Sdata_compression(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_s,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
     scatter(3*ones(size(VIdata_compression(:))),VIdata_compression(:),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
     
-    scatter(4*ones(size(Hdata_myelopathy(:))),Hdata_myelopathy(:),mrk_size,'^','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(4*ones(size(HSdata_myelopathy(:))),HSdata_myelopathy(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
-    scatter(4*ones(size(Sdata_myelopathy(:))),Sdata_myelopathy(:),mrk_size,'d','MarkerEdgeColor',clr_mpsi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(4*ones(size(Hdata_myelopathy(:))),Hdata_myelopathy(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_h,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(4*ones(size(HSdata_myelopathy(:))),HSdata_myelopathy(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_hs,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
+    scatter(4*ones(size(Sdata_myelopathy(:))),Sdata_myelopathy(:),mrk_size,'o','MarkerEdgeColor',clr_mpsi_s,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
     scatter(4*ones(size(VIdata_myelopathy(:))),VIdata_myelopathy(:),mrk_size,'x','MarkerEdgeColor',clr_mpsvi,'LineWidth',4,'MarkerEdgeAlpha',0.5,'jitter','on','jitteramount',0.17)
     
-    if pT_measurement_stenosis(1,vr(1,ind)) < 0.05
+    [~,~,~,tmp_pT_compression] = fdr_bh([pT_measurement_stenosis(1,vr(1,ind)) pT_measurement_compression(1,vr(1,ind)) pT_measurement_myelopathy(1,vr(1,ind)) ]);
+    
+    stats_myelopathy_effect_sizes{ind+8,1} = measurement_names{1,vr(1,ind)};
+    stats_myelopathy_effect_sizes{ind+8,2} = estimate_effect_sizes(Cdata(:),STENdata(:),'%.2f',tmp_pT_compression(1,1));
+    stats_myelopathy_effect_sizes{ind+8,3} = estimate_effect_sizes(STENdata(:),COMPdata(:),'%.2f',tmp_pT_compression(1,2));
+    stats_myelopathy_effect_sizes{ind+8,4} = estimate_effect_sizes(COMPdata(:),MYELdata(:),'%.2f',tmp_pT_compression(1,3));
+
+    if tmp_pT_compression(1,1) < p_thr_compression
         text(2,0.96*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
     end
-    if pT_measurement_compression(1,vr(1,ind)) < 0.05
+    if tmp_pT_compression(1,2) < p_thr_compression
         text(3,0.96*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
     end
-    if pT_measurement_myelopathy(1,vr(1,ind)) < 0.05
+    if tmp_pT_compression(1,3) < p_thr_compression
         text(4,0.96*ymax,'*','Fontsize',28,'Fontweight','bold','HorizontalAlignment','center')
     end
     
@@ -2201,3 +2351,13 @@ pause(0.15)
 close(h(fgrs+13).fig)
 pause(0.1)
 disp(num2str(fgrs+13))
+
+
+function effect_string = estimate_effect_sizes(X,Y,acurracy,p)
+    effect = meanEffectSize(X,Y,Effect="cohen");
+    effect_ci = cell2mat(table2cell(effect(1,'ConfidenceIntervals')));
+    effect_string = [ num2str(cell2mat(table2cell(effect(1,'Effect'))),acurracy) ' (' num2str(effect_ci(1,1),acurracy) '; ' num2str(effect_ci(1,2),acurracy) ')' ];
+    if p<0.05
+        effect_string(end+1) = '*';
+    end
+end
